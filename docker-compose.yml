@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  gohttpserver:
+    build:
+      context: ./gohttpserver
+    volumes:
+      - ./wp-content/uploads:/wp-content/uploads
+    restart: always
+
+  wordpress:
+    image: wordpress:php8.2-fpm
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./wp-content/themes:/var/www/html/wp-content/themes
+      - ./wp-content/uploads:/var/www/html/wp-content/uploads
+      - wp_files:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: host.docker.internal
+      WORDPRESS_DB_PORT: 3306
+      WORDPRESS_DB_USER: exampleuser
+      WORDPRESS_DB_NAME: exampledb
+    env_file: ./secrets/db_password.env
+    restart: always
+
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./wp-content/uploads:/wp-content/uploads
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - wp_files:/var/www/html
+    depends_on:
+      - wordpress
+      - gohttpserver
+    ports:
+      - "8081:80"
+    restart: always
+
+volumes:
+  wp_files:
+
+
+
+
