@@ -1,0 +1,29 @@
+- hosts: app_servers
+  become: yes
+  roles:
+    - name: copy Docker Compose file
+      copy:
+        src: ../docker-compose.yml
+        dest: /app/docker-compose.yml
+
+    - name: copy nginx config files
+      copy:
+        src: ../nginx
+        dest: /app/nginx
+
+    - name: copy gohttpserver dockerfile
+      copy:
+        src: ../gohttpserver
+        dest: /app/gohttpserver
+
+    - name: copy wordpress theme and upload directory
+      copy:
+        src: ../wp-content
+        dest: /app/wp-content
+
+
+    - name: deploy Docker Compose stack
+      community.docker.docker_compose:
+        project_src: /app
+        files:
+        - docker-compose.yml
